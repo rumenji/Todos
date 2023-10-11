@@ -1,25 +1,21 @@
 const todoForm = document.querySelector('form');
 const todoList = document.querySelector('#todoList');
 
+// add new entry to localStorage
 todoForm.addEventListener('submit', function(event){
     event.preventDefault();
-    savedList = [];
+    savedList = JSON.parse(localStorage.getItem('todoList')) || [];
     newEntry = document.querySelector('input').value;
-    savedList.push(newEntry);
-    if (localStorage.getItem('todoList')){
-        let existingEntries = JSON.parse(localStorage.getItem('todoList'));
-        existingEntries.push(newEntry);
-        localStorage.setItem('todoList', JSON.stringify(existingEntries));
-    }
-    else {
-        localStorage.setItem('todoList', JSON.stringify(savedList));
-    }
+    savedList.push({task: newEntry, completed: false});
+    localStorage.setItem('todoList', JSON.stringify(savedList));
     todoForm.reset();
+
+    //reset list and fetch the entries
     todoList.innerHTML = "";
     displayList()
 
 })
-
+// display to-do list from localStorage
 function displayList(){
     let existingEntries = JSON.parse(localStorage.getItem('todoList'));
     let id = 0;
@@ -29,34 +25,40 @@ function displayList(){
         const completeBtn = document.createElement('button');
         removeBtn.innerText = "Remove";
         completeBtn.innerText= "Complete";
-        todoItem.innerText = entry;
+        todoItem.innerText = entry.task;
         todoItem.id = id;
-        todoItem.append(completeBtn);
+        if (existingEntries[id].completed === true){
+            todoItem.className = "completed";
+        }
+        else {
+            todoItem.append(completeBtn);
+        }
+        
         todoItem.append(removeBtn);
         todoList.append(todoItem);
         id++;
     }
 }
 
-
+// remove or complete task
 todoList.addEventListener('click', function(event){
-    console.log(event);
-    if (event.target.innerText === 'Remove') {
-        event.target.parentElement.remove();
-        let currentItem = event.target.parentElement.id;
-        console.log(currentItem)
-        let existingEntries = JSON.parse(localStorage.getItem('todoList'));
-        existingEntries.splice(currentItem, 1);
-        localStorage.setItem('todoList', JSON.stringify(existingEntries));
-        todoList.innerHTML = "";
-        displayList()
+    let currentItem = event.target.parentElement.id;
+    let existingEntries = JSON.parse(localStorage.getItem('todoList'));
+    if (event.target.tagName === 'BUTTON'){
+        if (event.target.innerText === 'Remove') {
+            event.target.parentElement.remove();
+            existingEntries.splice(currentItem, 1);
+            localStorage.setItem('todoList', JSON.stringify(existingEntries));
+            todoList.innerHTML = "";
+            displayList()
+        }  
+        else {
+            event.target.parentElement.className = "completed";
+            event.target.remove();
+            existingEntries[currentItem].completed = true;
+            localStorage.setItem('todoList', JSON.stringify(existingEntries));
+        }
     }
-
-    // else {
-    //     event.target.parentElement.className = "completed";
-    //     event.target.remove();
-    // }
-
      });
-
+// display list on page load
 displayList()
