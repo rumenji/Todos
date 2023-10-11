@@ -1,0 +1,10 @@
+li {
+    color: darkblue;
+    font-family: sans-serif;
+    font-size: 20px;
+}
+
+.completed {
+    color: darkgrey;
+    text-decoration: line-through;
+}
